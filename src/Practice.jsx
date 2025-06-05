@@ -1,92 +1,133 @@
-import { Card } from 'flowbite-react';
+import { useState, useEffect } from 'react';
+import { Button } from 'flowbite-react';
+import ReactFlow, { 
+  Background,
+} from 'reactflow';
+import 'reactflow/dist/style.css';
+import Cookies from 'js-cookie';
+import Setup from './Setup';
 
-export default function PracticeSetup() {
-  return (
-    <section className="bg-light min-h-screen">
-      <div className="mx-auto max-w-screen-xl px-4 py-16">
-        <div className="text-center mb-12">
-          <h1 className="mb-4 text-4xl font-bold text-dark sm:text-5xl">Practice Setup Guide</h1>
-          <div className="mx-auto mb-8 h-1 w-24 bg-primary-500"></div>
-          <p className="mx-auto max-w-2xl text-lg text-gray-600">
-            Setting up your practice space correctly is essential for a safe and effective yoga session. 
-            Follow these guidelines to create an optimal environment for your practice.
-          </p>
-        </div>
+const Practice = () => {
+  const [hasReadSetup, setHasReadSetup] = useState(false);
+  const [selectedTime, setSelectedTime] = useState(null);
+  const [showVideos, setShowVideos] = useState(false);
 
-        <div className="grid gap-8 md:grid-cols-2">
-          <Card className="bg-white">
-            <h2 className="mb-4 text-2xl font-semibold text-primary">Mat Placement</h2>
-            <div className="space-y-4 text-gray-600">
-              <p>
-                Position your mat perpendicular to the camera, allowing for a clear view of your full body alignment.
-                Ensure there's enough space around your mat for movement.
-              </p>
-              <ul className="list-disc pl-5 space-y-2">
-                <li>Place your mat on a non-slip surface</li>
-                <li>Ensure adequate lighting from the front</li>
-                <li>Keep the camera at eye level when standing</li>
-                <li>Allow 2-3 feet of space around your mat</li>
-              </ul>
-            </div>
-          </Card>
+  // Check for cookie on component mount
+  useEffect(() => {
+    const setupRead = Cookies.get('setupRead');
+    if (setupRead === 'true') {
+      setHasReadSetup(true);
+    }
+  }, []);
 
-          <Card className="bg-white">
-            <h2 className="mb-4 text-2xl font-semibold text-primary">Essential Props</h2>
-            <div className="space-y-4 text-gray-600">
-              <p>Having the right props can enhance your practice and support proper alignment:</p>
-              <ul className="list-disc pl-5 space-y-2">
-                <li>Yoga mat (non-slip, appropriate thickness)</li>
-                <li>Blocks (2 recommended, cork or foam)</li>
-                <li>Yoga strap (cotton or nylon, 6-8 feet)</li>
-                <li>Bolster or cushion (for support and comfort)</li>
-                <li>Blanket (for padding and warmth)</li>
-                <li>Optional: Yoga wheel or foam roller</li>
-              </ul>
-            </div>
-          </Card>
-        </div>
+  const handleReadSetup = () => {
+    Cookies.set('setupRead', 'true', { expires: 365 }); // Cookie expires in 1 year
+    setHasReadSetup(true);
+  };
 
-        <div className="mt-12">
-          <Card className="bg-primary-50">
-            <h2 className="mb-4 text-2xl font-semibold text-primary-700">Practice Guidelines</h2>
-            <div className="grid gap-6 md:grid-cols-3">
-              <div className="space-y-2">
-                <h3 className="text-lg font-medium text-primary-600">Before Practice</h3>
-                <ul className="list-disc pl-5 text-gray-600">
-                  <li>Wear comfortable, stretchy clothing</li>
-                  <li>Practice on an empty stomach</li>
-                  <li>Stay hydrated</li>
-                  <li>Warm up properly</li>
-                </ul>
-              </div>
-              <div className="space-y-2">
-                <h3 className="text-lg font-medium text-primary-600">During Practice</h3>
-                <ul className="list-disc pl-5 text-gray-600">
-                  <li>Listen to your body</li>
-                  <li>Maintain steady breathing</li>
-                  <li>Focus on alignment</li>
-                  <li>Take breaks when needed</li>
-                </ul>
-              </div>
-              <div className="space-y-2">
-                <h3 className="text-lg font-medium text-primary-600">After Practice</h3>
-                <ul className="list-disc pl-5 text-gray-600">
-                  <li>Cool down properly</li>
-                  <li>Stay hydrated</li>
-                  <li>Rest in savasana</li>
-                  <li>Clean your props</li>
-                </ul>
-              </div>
-            </div>
-          </Card>
-        </div>
+  // Flow nodes and edges
+  const initialNodes = [
+    {
+      id: 'time-question',
+      type: 'input',
+      data: { label: 'How much time do you have today?' },
+      position: { x: 250, y: 0 },
+    },
+    {
+      id: 'less-than-60',
+      data: { label: '< 60 minutes' },
+      position: { x: 100, y: 100 },
+    },
+    {
+      id: 'more-than-60',
+      data: { label: '> 60 minutes' },
+      position: { x: 400, y: 100 },
+    },
+  ];
 
-        <div className="mt-12 text-center">
-          <p className="text-lg font-medium text-primary-600">
-            "The quality of your practice space directly influences the quality of your practice."
-          </p>
+  const initialEdges = [
+    { id: 'e1-2', source: 'time-question', target: 'less-than-60' },
+    { id: 'e1-3', source: 'time-question', target: 'more-than-60' },
+  ];
+
+  const [nodes] = useState(initialNodes);
+  const [edges] = useState(initialEdges);
+
+  const onNodeClick = (event, node) => {
+    if (node.id === 'less-than-60') {
+      setSelectedTime('short');
+      setShowVideos(true);
+    } else if (node.id === 'more-than-60') {
+      setSelectedTime('long');
+      setShowVideos(true);
+    }
+  };
+
+  // Video lists
+  const shortVideos = [
+    { id: 1, title: 'Quick Morning Flow', duration: '15 min', url: '/videos/quick-morning' },
+    { id: 2, title: 'Evening Wind Down', duration: '20 min', url: '/videos/evening-wind-down' },
+    { id: 3, title: 'Lunch Break Flow', duration: '30 min', url: '/videos/lunch-break' },
+  ];
+
+  const longVideos = [
+    { id: 1, title: 'Full Body Flow', duration: '75 min', url: '/videos/full-body' },
+    { id: 2, title: 'Deep Stretch Sequence', duration: '90 min', url: '/videos/deep-stretch' },
+    { id: 3, title: 'Advanced Practice', duration: '60 min', url: '/videos/advanced' },
+  ];
+
+  if (!hasReadSetup) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <Setup />
+        <div className="mt-8 text-center">
+          <Button color="primary" size="lg" onClick={handleReadSetup}>
+            I Read This
+          </Button>
         </div>
       </div>
-    </section>
+    );
+  }
+
+  if (showVideos) {
+    const videos = selectedTime === 'short' ? shortVideos : longVideos;
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <h2 className="mb-6 text-2xl font-bold text-primary">
+          {selectedTime === 'short' ? 'Quick Flows' : 'Your Path Flows'}
+        </h2>
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          {videos.map((video) => (
+            <div key={video.id} className="rounded-lg border border-primary-100 bg-white p-4 shadow-md">
+              <h3 className="mb-2 text-lg font-semibold text-primary">{video.title}</h3>
+              <p className="mb-4 text-gray-600">Duration: {video.duration}</p>
+              <Button color="primary" href={video.url}>
+                Start Practice
+              </Button>
+            </div>
+          ))}
+        </div>
+        <div className="mt-8 text-center">
+          <Button color="gray" onClick={() => setShowVideos(false)}>
+            Back to Time Selection
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="container mx-auto h-[600px] px-4 py-8">
+      <ReactFlow
+        nodes={nodes}
+        edges={edges}
+        onNodeClick={onNodeClick}
+        fitView
+      >
+        <Background />
+      </ReactFlow>
+    </div>
   );
-} 
+};
+
+export default Practice; 

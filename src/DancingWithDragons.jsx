@@ -65,7 +65,7 @@ export default function DancingWithDragons() {
               </ul>
               <div className="mt-6">
                 <a 
-                  href="https://app.acuityscheduling.com/schedule.php?owner=yourpathyoga" 
+                  href="https://yourpathyoga.setmore.com/services/8b0b6436-cd2a-40ad-bf91-5808f14c27a9" 
                   target="_blank" 
                   rel="noopener noreferrer"
                 >
